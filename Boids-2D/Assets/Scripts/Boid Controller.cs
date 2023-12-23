@@ -7,7 +7,10 @@ public class BoidController : MonoBehaviour
     public GameObject boidManager;
     public Vector2 velocity;
     public float speed;
+    public float minimumSpeed;
+    public float maximumSpeed;
     public float direction;
+    public List<GameObject> boidsToProtectFrom = new List<GameObject>();
 
     void Start()
     {
@@ -15,17 +18,67 @@ public class BoidController : MonoBehaviour
         SetRandomRotation();
         SetRandomColor();
 
-        speed = boidManager.GetComponent<BoidManager>().getSpeed();
+        minimumSpeed = boidManager.GetComponent<BoidManager>().GetMinSpeed();
+        maximumSpeed = boidManager.GetComponent<BoidManager>().GetMaxSpeed();
+
+        speed = boidManager.GetComponent<BoidManager>().GetSpeed();
         velocity = new Vector3(Mathf.Cos(direction * Mathf.Deg2Rad), Mathf.Sin(direction * Mathf.Deg2Rad), 0f) * speed;
+
+        if(velocity.magnitude > maximumSpeed)
+        {
+            velocity = velocity.normalized * maximumSpeed;
+        }
+
+        if(velocity.magnitude < minimumSpeed)
+        {
+            velocity = velocity.normalized * minimumSpeed;
+        }
     }
 
     void FixedUpdate()
     {
-        UpdateBoidRotation();
         UpdateBoidPosition();
+        UpdateBoidRotation();
+        UpdateBoidData();
+        FindBoidsToProtectFrom();
+
+        if(boidManager.GetComponent<BoidManager>().GetIsSeparating())
+        {
+            Seperate();
+        }
+    }
+    void SetRandomPosition()
+    {
+        //Grabs the Script component from the edge controller game object
+        CameraController cc = cameraController.GetComponent<CameraController>();
+
+        //Finds a random float value between the x positions of the edges of the camera in world point.
+        float randX = Random.Range(cc.getLeftCameraBound(),cc.getRightCameraBound());
+
+        //Finds a random float value between the y positions of the edges of the camera in world point.
+        float randY = Random.Range(cc.getBottomCameraBound(),cc.getTopCameraBound());
+
+        //Uses the previous two values to change the position of the boid to match the random position withing the bounds of the camera.
+        transform.position = new Vector3(randX,randY,0);
+    }
+
+    void SetRandomRotation()
+    {
+        float direction = Random.Range(-180f,180f);
+        Vector3 newDirection = new Vector3(0,0,direction);
+        transform.eulerAngles = newDirection;
+
         UpdateBoidData();
     }
 
+    void SetRandomColor()
+    {
+        //Finds the sprite renderer which holds the color attribute for the boid
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+
+        //Creates a random color and sets it as the boids color.
+        spriteRenderer.color = new Color(Random.Range(0,30)/255f,Random.Range(30,160)/255f,1);
+    }
     void UpdateBoidPosition()
     {
         transform.position += new Vector3(velocity.x, velocity.y, 0) * Time.fixedDeltaTime;
@@ -45,7 +98,41 @@ public class BoidController : MonoBehaviour
         direction = transform.eulerAngles.z;
         speed = velocity.magnitude;
     }
+    void FindBoidsToProtectFrom()
+    {
+        boidsToProtectFrom.Clear();
 
+        if(boidManager.GetComponent<BoidManager>().GetBoids() != null)
+        {
+            foreach(GameObject boid in boidManager.GetComponent<BoidManager>().GetBoids())
+            {
+                if(boid.transform != transform)
+                {
+                    if((boid.transform.position - transform.position).magnitude <= boidManager.GetComponent<BoidManager>().GetProtectionRadius())
+                    {
+                        boidsToProtectFrom.Add(boid);
+                    }
+                }
+            }
+        }
+    }
+    void Seperate()
+    {
+        foreach(GameObject boid in boidsToProtectFrom)
+        {
+            Vector2 changeInVelocity;
+
+            float normalizedDistance;
+
+            float seperateStrength = boidManager.GetComponent<BoidManager>().GetSeparationStrength();
+
+            changeInVelocity = boid.transform.position - transform.position;
+
+            normalizedDistance = Mathf.Clamp01(1f - changeInVelocity.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+
+            velocity -= changeInVelocity * normalizedDistance * seperateStrength;
+        }
+    }
     void OnTriggerExit2D(Collider2D collider)
     {
         if(collider != null && cameraController != null)
@@ -80,36 +167,11 @@ public class BoidController : MonoBehaviour
         }
     }
 
-    void SetRandomPosition()
+    void OnDrawGizmosSelected()
     {
-        //Grabs the Script component from the edge controller game object
-        CameraController cc = cameraController.GetComponent<CameraController>();
-
-        //Finds a random float value between the x positions of the edges of the camera in world point.
-        float randX = Random.Range(cc.getLeftCameraBound(),cc.getRightCameraBound());
-
-        //Finds a random float value between the y positions of the edges of the camera in world point.
-        float randY = Random.Range(cc.getBottomCameraBound(),cc.getTopCameraBound());
-
-        //Uses the previous two values to change the position of the boid to match the random position withing the bounds of the camera.
-        transform.position = new Vector3(randX,randY,0);
-    }
-
-    void SetRandomRotation()
-    {
-        float direction = Random.Range(-180f,180f);
-        Vector3 newDirection = new Vector3(0,0,direction);
-        transform.eulerAngles = newDirection;
-
-        UpdateBoidData();
-    }
-
-    void SetRandomColor()
-    {
-        //Finds the sprite renderer which holds the color attribute for the boid
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-
-        //Creates a random color and sets it as the boids color.
-        spriteRenderer.color = new Color(Random.Range(0,30)/255f,Random.Range(30,160)/255f,1);
+        foreach(GameObject boid in boidsToProtectFrom)
+        {
+            Gizmos.DrawLine(transform.position, boid.transform.position);
+        }
     }
 }

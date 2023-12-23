@@ -186,7 +186,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 2
+  orthographic size: 3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -504,7 +504,10 @@ MonoBehaviour:
   boidManager: {fileID: 1835048257}
   velocity: {x: 0, y: 0}
   speed: 0
+  minimumSpeed: 0
+  maximumSpeed: 0
   direction: 0
+  boidsToProtectFrom: []
 --- !u!1 &1835048257
 GameObject:
   m_ObjectHideFlags: 0
@@ -551,8 +554,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidBlueprint: {fileID: 1792610320}
   boidParent: {fileID: 919570656}
+  boids: []
   numBoids: 20
-  speed: 2
+  speed: 1
+  minimumSpeed: 0.66
+  maximumSpeed: 2
+  seperate: 1
+  protectionRadius: 0.5
+  seperationStrength: 0.5
   allBoids: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
