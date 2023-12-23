@@ -186,7 +186,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -324,7 +324,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1792610321
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -502,20 +502,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraController: {fileID: 519420028}
   boidManager: {fileID: 1835048257}
+  velocity: {x: 0, y: 0}
   speed: 0
-  velocity: {x: 0, y: 0, z: 0}
-  isSeperating: 0
-  isAligning: 0
-  isCohesive: 0
-  nearbyBoids: []
-  viewingAngle: 0
-  viewableRadius: 0
-  protectableRadius: 0
-  nearbyBoidAngles: []
-  avoidFactor: 0
-  drawSphere: 0
-  drawViewingAngles: 0
-  drawToNearbyBoids: 0
+  direction: 0
 --- !u!1 &1835048257
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,15 +551,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidBlueprint: {fileID: 1792610320}
   boidParent: {fileID: 919570656}
-  numBoids: 25
-  speed: 1
-  viewingAngle: 270
-  viewableRadius: 4
-  protectableRadius: 2
-  avoidFactor: 0
-  isSeperating: 0
-  isAligning: 0
-  isCohesive: 0
+  numBoids: 20
+  speed: 2
   allBoids: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
