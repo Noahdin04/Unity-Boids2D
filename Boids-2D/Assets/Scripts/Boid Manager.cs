@@ -16,6 +16,9 @@ public class BoidManager : MonoBehaviour
     public bool separate;
     public float protectionRadius;
     public float separationStrength;
+    public bool center;
+    public float viewableRadius;
+    public float centerStrength;
 
     void Start()
     {
@@ -71,5 +74,17 @@ public class BoidManager : MonoBehaviour
     public float GetSeparationStrength()
     {
         return separationStrength;
+    }
+    public bool GetIsCentering()
+    {
+        return center;
+    }
+    public float GetViewableRadius()
+    {
+        return viewableRadius;
+    }
+    public float GetCenterStrength()
+    {
+        return centerStrength;
     }
 }

@@ -507,7 +507,8 @@ MonoBehaviour:
   minimumSpeed: 0
   maximumSpeed: 0
   direction: 0
-  boidsToProtectFrom: []
+  boidsInProtectionRadius: []
+  boidsInViewingRadius: []
 --- !u!1 &1835048257
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,7 +556,7 @@ MonoBehaviour:
   boidBlueprint: {fileID: 1792610320}
   boidParent: {fileID: 919570656}
   boids: []
-  numBoids: 35
+  numBoids: 60
   speed: 1
   minimumSpeed: 0.66
   maximumSpeed: 1.5
@@ -565,7 +566,9 @@ MonoBehaviour:
   separate: 1
   protectionRadius: 0.5
   separationStrength: 0.5
-  allBoids: []
+  center: 1
+  viewableRadius: 1
+  centerStrength: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

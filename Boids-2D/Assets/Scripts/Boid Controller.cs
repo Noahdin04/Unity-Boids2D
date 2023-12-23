@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.GameCenter;
 
 public class BoidController : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class BoidController : MonoBehaviour
     public float minimumSpeed;
     public float maximumSpeed;
     public float direction;
-    public List<GameObject> boidsToProtectFrom = new List<GameObject>();
+    public List<GameObject> boidsInProtectionRadius = new List<GameObject>();
+    public List<GameObject> boidsInViewingRadius = new List<GameObject>();
 
     void Start()
     {
@@ -27,6 +29,7 @@ public class BoidController : MonoBehaviour
 
     void FixedUpdate()
     {
+        UpdateBoidLists();
         checkValidPosition();
         UpdateBoidPosition();
         UpdateBoidRotation();
@@ -38,11 +41,14 @@ public class BoidController : MonoBehaviour
             AvoidWalls();
         }
 
-        FindBoidsToProtectFrom();
-
         if(boidManager.GetComponent<BoidManager>().GetIsSeparating())
         {
             Seperate();
+        }
+
+        if(boidManager.GetComponent<BoidManager>().GetIsCentering())
+        {
+            Center();
         }
     }
     void SetRandomPosition()
@@ -154,9 +160,10 @@ public class BoidController : MonoBehaviour
             velocity -= bottomWallPositionDifference * normalizedDistance * seperateStrength;
         }
     }
-    void FindBoidsToProtectFrom()
+    void UpdateBoidLists()
     {
-        boidsToProtectFrom.Clear();
+        boidsInProtectionRadius.Clear();
+        boidsInViewingRadius.Clear();
 
         if(boidManager.GetComponent<BoidManager>().GetBoids() != null)
         {
@@ -164,9 +171,14 @@ public class BoidController : MonoBehaviour
             {
                 if(boid.transform != transform)
                 {
-                    if((boid.transform.position - transform.position).magnitude <= boidManager.GetComponent<BoidManager>().GetProtectionRadius())
+                    if((boid.transform.position - transform.position).magnitude <= boidManager.GetComponent<BoidManager>().GetViewableRadius())
                     {
-                        boidsToProtectFrom.Add(boid);
+                        boidsInViewingRadius.Add(boid);
+
+                        if((boid.transform.position - transform.position).magnitude <= boidManager.GetComponent<BoidManager>().GetProtectionRadius())
+                        {
+                            boidsInProtectionRadius.Add(boid);
+                        }
                     }
                 }
             }
@@ -174,7 +186,7 @@ public class BoidController : MonoBehaviour
     }
     void Seperate()
     {
-        foreach(GameObject boid in boidsToProtectFrom)
+        foreach(GameObject boid in boidsInProtectionRadius)
         {
             Vector2 boidPositionDifference;
 
@@ -187,6 +199,25 @@ public class BoidController : MonoBehaviour
             normalizedDistance = Mathf.Clamp01(1f - boidPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
 
             velocity -= boidPositionDifference * normalizedDistance * seperateStrength;
+        }
+    }
+
+    void Center()
+    {
+        if(boidsInViewingRadius.Count != 0)
+        {
+            Vector2 boidsCenter = new Vector2(0f,0f);
+
+            float centerStrength = boidManager.GetComponent<BoidManager>().GetCenterStrength();
+
+            foreach(GameObject boid in boidsInViewingRadius)
+            {
+                boidsCenter += (Vector2)boid.transform.position;
+            }
+
+            boidsCenter /= boidsInViewingRadius.Count;
+
+            velocity += (boidsCenter - (Vector2)transform.position) * centerStrength;
         }
     }
 
@@ -215,7 +246,7 @@ public class BoidController : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        foreach(GameObject boid in boidsToProtectFrom)
+        foreach(GameObject boid in boidsInProtectionRadius)
         {
             Gizmos.DrawLine(transform.position, boid.transform.position);
         }
