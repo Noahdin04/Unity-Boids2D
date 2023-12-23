@@ -19,6 +19,8 @@ public class BoidManager : MonoBehaviour
     public bool center;
     public float viewableRadius;
     public float centerStrength;
+    public bool align;
+    public float alignStrength;
 
     void Start()
     {
@@ -86,5 +88,13 @@ public class BoidManager : MonoBehaviour
     public float GetCenterStrength()
     {
         return centerStrength;
+    }
+    public bool GetIsAligning()
+    {
+        return align;
+    }
+    public float GetAlignStrength()
+    {
+        return alignStrength;
     }
 }

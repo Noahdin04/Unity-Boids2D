@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.GameCenter;
+using UnityEngine.UIElements;
 
 public class BoidController : MonoBehaviour
 {
@@ -49,6 +50,11 @@ public class BoidController : MonoBehaviour
         if(boidManager.GetComponent<BoidManager>().GetIsCentering())
         {
             Center();
+        }
+
+        if(boidManager.GetComponent<BoidManager>().GetIsAligning())
+        {
+            Align();
         }
     }
     void SetRandomPosition()
@@ -169,7 +175,7 @@ public class BoidController : MonoBehaviour
         {
             foreach(GameObject boid in boidManager.GetComponent<BoidManager>().GetBoids())
             {
-                if(boid.transform != transform)
+                if(boid != gameObject)
                 {
                     if((boid.transform.position - transform.position).magnitude <= boidManager.GetComponent<BoidManager>().GetViewableRadius())
                     {
@@ -221,6 +227,25 @@ public class BoidController : MonoBehaviour
         }
     }
 
+    void Align()
+    {
+        if(boidsInViewingRadius.Count != 0)
+        {
+            Vector2 boidsVelocity = new Vector2(0f,0f);
+
+            float alignStrength = boidManager.GetComponent<BoidManager>().GetCenterStrength();
+
+            foreach(GameObject boid in boidsInViewingRadius)
+            {
+                boidsVelocity += boid.GetComponent<BoidController>().GetVelocity();
+            }
+
+            boidsVelocity /= boidsInViewingRadius.Count;
+
+            velocity += (boidsVelocity - velocity) * alignStrength;
+        }
+    }
+
     void checkValidPosition()
     {
         //Grabs the Script component from the edge controller game object
@@ -250,5 +275,10 @@ public class BoidController : MonoBehaviour
         {
             Gizmos.DrawLine(transform.position, boid.transform.position);
         }
+    }
+
+    public Vector2 GetVelocity()
+    {
+        return velocity;
     }
 }
