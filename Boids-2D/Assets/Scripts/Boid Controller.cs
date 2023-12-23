@@ -23,18 +23,6 @@ public class BoidController : MonoBehaviour
 
         speed = boidManager.GetComponent<BoidManager>().GetSpeed();
         velocity = new Vector3(Mathf.Cos(direction * Mathf.Deg2Rad), Mathf.Sin(direction * Mathf.Deg2Rad), 0f) * speed;
-
-        if(velocity.magnitude > maximumSpeed)
-        {
-            velocity = velocity.normalized * maximumSpeed;
-            Debug.Log("Breaching Minimum Speed");
-        }
-
-        if(velocity.magnitude < minimumSpeed)
-        {
-            velocity = velocity.normalized * minimumSpeed;
-            Debug.Log("Breaching Maximum Speed");
-        }
     }
 
     void FixedUpdate()
@@ -42,7 +30,14 @@ public class BoidController : MonoBehaviour
         checkValidPosition();
         UpdateBoidPosition();
         UpdateBoidRotation();
+        CheckBoidSpeed();
         UpdateBoidData();
+
+        if(boidManager.GetComponent<BoidManager>().GetAvoidWalls())
+        {
+            AvoidWalls();
+        }
+
         FindBoidsToProtectFrom();
 
         if(boidManager.GetComponent<BoidManager>().GetIsSeparating())
@@ -95,11 +90,69 @@ public class BoidController : MonoBehaviour
 
         transform.eulerAngles = new Vector3(0,0,directionToNewPosition);
     }
+    void CheckBoidSpeed()
+    {
+        if(speed > maximumSpeed)
+        {
+            velocity = velocity.normalized * maximumSpeed;
+        }
+
+        if(speed < minimumSpeed)
+        {
+            velocity = velocity.normalized * minimumSpeed;
+        }
+    }
 
     void UpdateBoidData()
     {
         direction = transform.eulerAngles.z;
         speed = velocity.magnitude;
+    }
+
+    void AvoidWalls()
+    {
+        //Grabs the Script component from the edge controller game object
+        CameraController cc = cameraController.GetComponent<CameraController>();
+
+        float protectionRadius = boidManager.GetComponent<BoidManager>().GetWallAvoidanceRadius();
+
+        float seperateStrength = boidManager.GetComponent<BoidManager>().GetWallAvoidanceStrength();
+
+        if(transform.position.x - protectionRadius < cc.getLeftCameraBound())
+        {
+            Vector2 leftWallPositionDifference = new Vector2(cc.getLeftCameraBound(), transform.position.y) - (Vector2)transform.position;
+
+            float normalizedDistance = Mathf.Clamp01(1f - leftWallPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+
+            velocity -= leftWallPositionDifference * normalizedDistance * seperateStrength;
+        }
+
+        if(transform.position.x + protectionRadius > cc.getRightCameraBound())
+        {
+            Vector2 rightWallPositionDifference = new Vector2(cc.getRightCameraBound(), transform.position.y) - (Vector2)transform.position;
+
+            float normalizedDistance = Mathf.Clamp01(1f - rightWallPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+            
+            velocity -= rightWallPositionDifference * normalizedDistance * seperateStrength;
+        }
+
+        if(transform.position.y + protectionRadius > cc.getTopCameraBound())
+        {
+            Vector2 topWallPositionDifference = new Vector2(transform.position.x, cc.getTopCameraBound()) - (Vector2)transform.position;
+
+            float normalizedDistance = Mathf.Clamp01(1f - topWallPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+            
+            velocity -= topWallPositionDifference * normalizedDistance * seperateStrength;
+        }
+
+        if(transform.position.y - protectionRadius < cc.getBottomCameraBound())
+        {
+            Vector2 bottomWallPositionDifference = new Vector2(transform.position.x, cc.getBottomCameraBound()) - (Vector2)transform.position;
+
+            float normalizedDistance = Mathf.Clamp01(1f - bottomWallPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+            
+            velocity -= bottomWallPositionDifference * normalizedDistance * seperateStrength;
+        }
     }
     void FindBoidsToProtectFrom()
     {
@@ -123,17 +176,17 @@ public class BoidController : MonoBehaviour
     {
         foreach(GameObject boid in boidsToProtectFrom)
         {
-            Vector2 changeInVelocity;
+            Vector2 boidPositionDifference;
 
             float normalizedDistance;
 
             float seperateStrength = boidManager.GetComponent<BoidManager>().GetSeparationStrength();
 
-            changeInVelocity = boid.transform.position - transform.position;
+            boidPositionDifference = boid.transform.position - transform.position;
 
-            normalizedDistance = Mathf.Clamp01(1f - changeInVelocity.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
+            normalizedDistance = Mathf.Clamp01(1f - boidPositionDifference.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
 
-            velocity -= changeInVelocity * normalizedDistance * seperateStrength;
+            velocity -= boidPositionDifference * normalizedDistance * seperateStrength;
         }
     }
 

@@ -10,11 +10,12 @@ public class BoidManager : MonoBehaviour
     public float speed;
     public float minimumSpeed;
     public float maximumSpeed;
+    public bool avoidWalls;
+    public float wallAvoidanceRadius;
+    public float wallAvoidanceStrength;
     public bool separate;
     public float protectionRadius;
     public float separationStrength;
-
-    public List<GameObject> allBoids = new List<GameObject>();
 
     void Start()
     {
@@ -50,6 +51,18 @@ public class BoidManager : MonoBehaviour
     public bool GetIsSeparating()
     {
         return separate;
+    }
+    public bool GetAvoidWalls()
+    {
+        return avoidWalls;
+    }
+    public float GetWallAvoidanceRadius()
+    {
+        return wallAvoidanceRadius;
+    }
+    public float GetWallAvoidanceStrength()
+    {
+        return wallAvoidanceStrength;
     }
     public float GetProtectionRadius()
     {
