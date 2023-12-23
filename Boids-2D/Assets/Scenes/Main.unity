@@ -558,10 +558,10 @@ MonoBehaviour:
   numBoids: 20
   speed: 1
   minimumSpeed: 0.66
-  maximumSpeed: 2
-  seperate: 1
+  maximumSpeed: 1.5
+  separate: 1
   protectionRadius: 0.5
-  seperationStrength: 0.5
+  separationStrength: 0.5
   allBoids: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

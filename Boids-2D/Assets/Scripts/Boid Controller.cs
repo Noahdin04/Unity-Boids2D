@@ -27,16 +27,19 @@ public class BoidController : MonoBehaviour
         if(velocity.magnitude > maximumSpeed)
         {
             velocity = velocity.normalized * maximumSpeed;
+            Debug.Log("Breaching Minimum Speed");
         }
 
         if(velocity.magnitude < minimumSpeed)
         {
             velocity = velocity.normalized * minimumSpeed;
+            Debug.Log("Breaching Maximum Speed");
         }
     }
 
     void FixedUpdate()
     {
+        checkValidPosition();
         UpdateBoidPosition();
         UpdateBoidRotation();
         UpdateBoidData();
@@ -131,16 +134,6 @@ public class BoidController : MonoBehaviour
             normalizedDistance = Mathf.Clamp01(1f - changeInVelocity.magnitude / boidManager.GetComponent<BoidManager>().GetProtectionRadius());
 
             velocity -= changeInVelocity * normalizedDistance * seperateStrength;
-        }
-    }
-    void OnTriggerExit2D(Collider2D collider)
-    {
-        if(collider != null && cameraController != null)
-        {
-            if(collider == cameraController.GetComponent<BoxCollider2D>())
-            {
-                checkValidPosition();
-            }
         }
     }
 
